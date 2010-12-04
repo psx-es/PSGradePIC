@@ -262,29 +262,22 @@ void main() {
 					EP_BDxST_I(1) = 0x40;   //Clear IN endpoint
 					if(nJigs == 8) {
 						//prepare the response
-
 						jig_response[1]--;
-
 						jig_response[3]++;
+						jig_response[6]++;
 
-						jig_challenge_res[6]++;
-
-
-						HMACBlock(&jig_challenge_res[CHALLENGE_INDEX],20);
-
+						HMACBlock(&jig_response[CHALLENGE_INDEX], 20);
 
 						usb_task(); //just in case
 
-
 						HMACDone();
 
-						jig_challenge_res[7] = jig_id[0];
-						jig_challenge_res[8] = jig_id[1];
+						jig_response[7] = jig_id[0];
+						jig_response[8] = jig_id[1];
 
 						int i;
-						for(i = 0; i < 20; i++)
- {
-							jig_challenge_res[9+i] = hmacdigest[i];
+						for(i = 0; i < 20; i++) {
+							jig_response[9 + i] = hmacdigest[i];
 						}
 
 						nJigs = 0;
