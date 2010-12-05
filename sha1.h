@@ -1,36 +1,41 @@
-/*  SHA-1 - an implementation of the Secure Hash Algorithm in C
-    Version as of September 22nd 2006
-    
-    Copyright (C) 2006 CHZ-Soft, Christian Zietz, <czietz@gmx.net>
-    See README file for more information.
-    
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+/*
+ * SHA1 hash implementation and interface functions
+ * Copyright (c) 2003-2005, Jouni Malinen <j@w1.fi>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ *
+ * Alternatively, this software may be distributed under the terms of BSD
+ * license.
+ *
+ * See README and COPYING for more details.
+ */
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+#ifndef SHA1_H
+#define SHA1_H
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the 
-    Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, 
-    Boston, MA  02110-1301, USA
-*/
+#define SHA1_MAC_LEN 20
 
-#ifndef __SHA1_H__
-#define __SHA1_H__
+struct SHA1Context {
+	uint32_t state[5];
+	uint32_t count[2];
+	unsigned char buffer[64];
+};
 
-#include <stdint.h>
+typedef struct SHA1Context SHA1_CTX;
 
-extern unsigned char shadigest[20];
+void SHA1Init(SHA1_CTX *context);
+void SHA1Update(SHA1_CTX *context, const void *data, uint32_t len);
+void SHA1Final(unsigned char digest[20], SHA1_CTX *context);
 
-void SHA1Init(void);
-void SHA1Block(const unsigned char* data, const uint8_t len);
-void SHA1Done(void);
-void SHA1Once(const unsigned char* data, int len);
+void sha1_vector(size_t num_elem, const uint8_t *addr[], const size_t *len,
+    uint8_t *mac);
+void hmac_sha1_vector(const uint8_t *key, size_t key_len, size_t num_elem,
+    const uint8_t *addr[], const size_t *len, uint8_t *mac);
+void hmac_sha1(const uint8_t *key, size_t key_len,
+    const uint8_t *data, size_t data_len, uint8_t *mac);
+void sha1_prf(const uint8_t *key, size_t key_len, const char *label,
+    const uint8_t *data, size_t data_len, uint8_t *buf, size_t buf_len);
 
-#endif
-
+#endif /* SHA1_H */

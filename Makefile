@@ -6,7 +6,7 @@ CCS_FLAGS_WBLMCHP		= $(CCS_FLAGS_NBL) +GWBOOTLOADERMCHP="true"
 CCS_FLAGS_LEDS			= +GLEDR1="PIN_B4" +GLEDR2="PIN_B1" +GLEDR3="PIN_C0" +GLEDG1="PIN_B5" +GLEDG2="PIN_C1"
 ZIP						= zip -r
 BUILD_DIR				= build
-CLEAN_FILES				= *.err *.esym *.cod *.sym *.hex *.zip
+CLEAN_FILES				= *.err *.esym *.cod *.sym *.hex *.zip $(BUILD_DIR)
 
 BOOTLOADER_BUILDS	=	nBTL \
 						wBTL_HID \
@@ -41,7 +41,3 @@ all:
 clean: 
 		#Clean files.
 		rm -f -r $(CLEAN_FILES)
-
-		#Remove compilations.
-		$(MAKE) -C $(PAYLOAD_DIR)/ clean
-		$(MAKE) -C tools/ clean
