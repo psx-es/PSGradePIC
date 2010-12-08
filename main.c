@@ -30,17 +30,18 @@
 #define USB_EP2_RX_ENABLE  USB_ENABLE_INTERRUPT
 #define USB_EP2_RX_SIZE    8
 
-#include "sha1.h"
-#include "sha1.c"
 #include "usb.h"
 #include "usb_desc.h"
-#include "pic18_usb.h"
-#include "pic18_usb.c"
-#include "usb.c"
 
 #define __USB_DESCRIPTORS__
 unsigned char USB_NUM_INTERFACES[1] = {1};
 char const USB_STRING_DESC[] = {5, USB_DESC_STRING_TYPE, 'H', 0, 'O', 0, 'L', 0, 'A', 0};
+
+#include "pic18_usb.h"
+#include "pic18_usb.c"
+#include "usb.c"
+
+#include "sha1.c"
 
 #define PORT_EMPTY   0x0100 
 #define PORT_FULL    0x0103 
@@ -285,8 +286,13 @@ void main() {
 							}
 						}
 
+						hmac_sha1 (usb_dongle_master_key, sizeof(usb_dongle_master_key), (uint8_t *)&dongle_id, sizeof(uint16_t), usb_dongle_key);
+						hmac_sha1 (usb_dongle_key, SHA1_MAC_LEN, jig_challenge + JIG_DATA_HEADER_LEN, SHA1_MAC_LEN, jig_response + JIG_DATA_HEADER_LEN + sizeof(dongle_id));
+
+						/*
 						hmac_sha1 (usb_dongle_master_key, SHA1_MAC_LEN, (uint8_t *)&dongle_id, sizeof(uint16_t), dongle_key);
 						hmac_sha1 (dongle_key, SHA1_MAC_LEN, jig_challenge + JIG_DATA_HEADER_LEN, SHA1_MAC_LEN, jig_response + JIG_DATA_HEADER_LEN + sizeof(dongle_id));
+						*/
 
 						nJigs = 0;
 						WaitJig = 2;
