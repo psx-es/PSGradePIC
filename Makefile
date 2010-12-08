@@ -12,7 +12,7 @@ BOOTLOADER_BUILDS	=	nBTL \
 						wBTL_HID \
 						wBTL_MCHP
 
-VERSION = git rev-parse HEAD
+VERSION = $(shell git rev-parse HEAD)
 
 all:
 		#HEX with HID Bootloader.
@@ -29,14 +29,14 @@ all:
 		$(foreach bl_pic, $(BOOTLOADER_BUILDS), mkdir $(BUILD_DIR)/$(bl_pic); )
 
 		#Fix MCHP Bootloader
-		sed -i '1i :020000040000FA..' PSGrooPIC_*_wBTL_MCHP.hex
+		sed -i '1i :020000040000FA..' PSGradePIC*_wBTL_MCHP.hex
 
 		#Move each payload to its directory.
 		$(foreach bl_pic, $(BOOTLOADER_BUILDS), mv *_$(bl_pic).hex $(BUILD_DIR)/$(bl_pic); )
 
 		#Zip all HEX.
 		cd $(BUILD_DIR) && $(ZIP) "PSGradePIC_$(VERSION)" *
-		mv build/PSGrooPIC_$(VERSION).zip ./
+		mv build/PSGradePIC_$(VERSION).zip ./
 
 clean: 
 		#Clean files.

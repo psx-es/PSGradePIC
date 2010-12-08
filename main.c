@@ -1,12 +1,10 @@
 #include <18F4550.h>
-#include <stdint.h>
-#include <stdlib.h>
 #fuses HSPLL,NOWDT,NOPROTECT,NODEBUG,NOBROWNOUT,USBDIV,PLL2,CPUDIV1,VREGEN,PUT,NOMCLR,NOLVP
 #use delay(clock=48000000)
 
 #use rs232(baud=115200, xmit=pin_c6, rcv=pin_c7)
 
-#define JIG_DATA_HEADER_LEN	7
+#define CHALLENGE_INDEX	7
 
 /////////////////////////
 // Bootloader Memory Space
@@ -41,7 +39,8 @@ char const USB_STRING_DESC[] = {5, USB_DESC_STRING_TYPE, 'H', 0, 'O', 0, 'L', 0,
 #include "pic18_usb.c"
 #include "usb.c"
 
-#include "sha1.c"
+#include "hmac.h"
+#include "hmac.c"
 
 #define PORT_EMPTY   0x0100 
 #define PORT_FULL    0x0103 
@@ -259,40 +258,27 @@ void main() {
 					c = usb_get_packet(2, TxBuf, 8);
 
 					for(i = 0; i < 8; i++) {
-						jig_response[8 * nJigs + i] = TxBuf[i];
+						jig_challenge_res[8 * nJigs + i] = TxBuf[i];
 					}
 
 					nJigs++;
 					EP_BDxST_I(1) = 0x40;   //Clear IN endpoint
 					if(nJigs == 8) {
 						//prepare the response
-						uint16_t dongle_id [2] = {rand(), rand()};
-						uint8_t dongle_key[SHA1_MAC_LEN] = {0};
+						jig_challenge_res[1]--;
+						jig_challenge_res[3]++;
+						jig_challenge_res[6]++;
 
-						jig_response[0] = 0x00;
-						jig_response[1] = 0x00;
-						jig_response[2] = 0xFF;
-						jig_response[3] = 0x00;
-						jig_response[4] = 0x2E;
-						jig_response[5] = 0x02;
-						jig_response[6] = 0x02;
+						HMACBlock(&jig_challenge_res[CHALLENGE_INDEX],20);
 
-						for(i = 0; usb_dongle_revoke_list[i] != 0xFFFF; i++) {
-							if (dongle_id == usb_dongle_revoke_list[i]) {
-								dongle_id[0] = random();
-								dongle_id[1] = random();
-								i = -1;
-								continue;
-							}
+						HMACDone();
+
+						jig_challenge_res[7] = jig_id[0];
+						jig_challenge_res[8] = jig_id[1];
+
+						for( i = 0; i < 20; i++) {
+							jig_challenge_res[9+i] = hmacdigest[i];
 						}
-
-						hmac_sha1 (usb_dongle_master_key, sizeof(usb_dongle_master_key), (uint8_t *)&dongle_id, sizeof(uint16_t), usb_dongle_key);
-						hmac_sha1 (usb_dongle_key, SHA1_MAC_LEN, jig_challenge + JIG_DATA_HEADER_LEN, SHA1_MAC_LEN, jig_response + JIG_DATA_HEADER_LEN + sizeof(dongle_id));
-
-						/*
-						hmac_sha1 (usb_dongle_master_key, SHA1_MAC_LEN, (uint8_t *)&dongle_id, sizeof(uint16_t), dongle_key);
-						hmac_sha1 (dongle_key, SHA1_MAC_LEN, jig_challenge + JIG_DATA_HEADER_LEN, SHA1_MAC_LEN, jig_response + JIG_DATA_HEADER_LEN + sizeof(dongle_id));
-						*/
 
 						nJigs = 0;
 						WaitJig = 2;
@@ -303,7 +289,7 @@ void main() {
 			else {
 				int n = 0;
 				for(n = 0; n < 8; ++n) {
-					TxBuf[n] = jig_challenge[8 * nJigs + n];
+					TxBuf[n] = jig_challenge_res[8 * nJigs + n];
 				}
 				if(usb_put_packet(1, TxBuf, 8, nJigs == 0 ? 0 : USB_DTS_TOGGLE)) {
 					Delay10ms(1);

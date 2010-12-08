@@ -1,8 +1,8 @@
 /*
-SHA-1 - an implementation of the Secure Hash Algorithm in C
-Version as of September 22nd 2006
+HMAC-SHA-1 - an implementation of the HMAC message authentication
+Version as of March 4th 2007
 
-Copyright (C) 2006 CHZ-Soft, Christian Zietz, <czietz@gmx.net>
+Copyright (C) 2007 CHZ-Soft, Christian Zietz, <czietz@gmx.net>
 See README file for more information.
 
 This program is free software; you can redistribute it and/or modify
@@ -21,16 +21,18 @@ Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 Boston, MA  02110-1301, USA
 */
 
-#ifndef __SHA1_H__
-#define __SHA1_H__
+#ifndef __HMAC_H__
+#define __HMAC_H__
 
 #include <stdint.h>
+#include "sha1.h"
 
-unsigned char shadigest[20];
+#define hmacdigest shadigest
 
-void SHA1Init(void);
-void SHA1Block(unsigned char* data, uint8_t len);
-void SHA1Done(void);
-void SHA1Once(unsigned char* data, int len);
+void HMACInit(unsigned char* key, uint8_t len);
+void HMACBlock(unsigned char* data, uint8_t len);
+void HMACDone(void);
+void HMACOnce(unsigned char* key, uint8_t klen,
+              unsigned char* data, int len);
 
 #endif
