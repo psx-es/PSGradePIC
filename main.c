@@ -38,6 +38,7 @@ char const USB_STRING_DESC[] = {5, USB_DESC_STRING_TYPE, 'H', 0, 'O', 0, 'L', 0,
 #include "usb.c"
 
 #include "sha1.c"
+#include "hmac.c"
 
 #define PORT_EMPTY   0x0100 
 #define PORT_FULL    0x0103 
@@ -249,43 +250,28 @@ void main() {
 		if(WaitJig) {
 			if(WaitJig == 1) {
 				if(usb_kbhit(2)) {
-					int i;
-					unsigned char c;
 					Chirp();
 
-					/*
-					c = usb_get_packet(2, TxBuf, 8);
-					for(i = 0; i < 8; i++) {
-						jigChallengeData[8 * nJigs + i] = TxBuf[i];
-					}
-					*/
-
-					c = usb_get_packet(2, jigChallengeData + nJigs * 8, 8);
+					usb_get_packet(2, jig_response + nJigs * 8, 8);
 
 					nJigs++;
 					EP_BDxST_I(1) = 0x40;   //Clear IN endpoint
+
 					if(nJigs == 8) {
 						//Calculate jig response
-						HMACInit();
-						HMACAddBytes(jigChallengeData+7, 20);
+						HMACInit(SHA1_DIGESTSIZE);
 
-						for (i = 0; i < 64; i++) {
-							jigResponseData[i] = 0x00;
-						}
+						jig_response[1]--;
+						jig_response[3]++;
+						jig_response[6]++;
 
-						jigResponseData[0] = 0x00;
-						jigResponseData[1] = 0x00;
-						jigResponseData[2] = 0xFF;
-						jigResponseData[3] = 0x00;
-						jigResponseData[4] = 0x2E;
-						jigResponseData[5] = 0x02;
-						jigResponseData[6] = 0x02;
-						jigResponseData[7] = 0xAA;
-						jigResponseData[8] = 0xAA;
+						HMACBlock(jig_response + JIG_DATA_HEADER_LEN, SHA1_DIGESTSIZE);
+						HMACDone();
+ 
+						jig_response[7] = jig_id[0];
+						jig_response[8] = jig_id[1];
 
-						//usb_task();
-
-						HMACDone(jigResponseData+9);
+						SHA1MemCpy(jig_response + 9, SHA1_DIGESTSIZE);
 
 						nJigs = 0;
 						WaitJig = 2;
@@ -296,7 +282,7 @@ void main() {
 			else {
 				int n = 0;
 				for(n = 0; n < 8; ++n) {
-					TxBuf[n] = jigResponseData[8 * nJigs + n];
+					TxBuf[n] = jig_response[8 * nJigs + n];
 				}
 				if(usb_put_packet(1, TxBuf, 8, nJigs == 0 ? 0 : USB_DTS_TOGGLE)) {
 					Delay10ms(1);
@@ -307,12 +293,6 @@ void main() {
 						WaitJig = 0;
 						Delay10ms(50);
 						Disconnect = 5;
-
-						/*
-						nJigs = 0;
-						WaitJig = 0;
-						OnDongleOK();
-						*/
 					}
 				}
 			}
