@@ -277,7 +277,7 @@ void main() {
 
 						nJigs = 0;
 						WaitJig = 2;
-						//Delay10ms(50);
+						Delay10ms(50);
 					}
 				}
 			}
@@ -293,11 +293,8 @@ void main() {
 					if(nJigs == 8) {
 						nJigs = 0;
 						WaitJig = 0;
-						OnDongleOK();
-						/*
 						Delay10ms(50);
 						Disconnect = 5;
-						*/
 					}
 				}
 			}
