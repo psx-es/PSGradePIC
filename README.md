@@ -61,6 +61,16 @@ about that.
 
 Credits
 -------
-/* Credits to be done :D. */
+Thanks to PSGroove developers who did the real hard work by reversing the code from the original PSJailbreak.
+
+Thanks to ElSemi (@eol) which made possible the first port to PIC18F and helped me with the PSGrade port.
+
+Thanks to zAxis, Hansi and in general all the ps3 community and graf_chokolo for their hard work on getting the PS3 USB Dongle Master Key.
+
+Thanks to PS3Break Team, who figured out my code bugs and sent me the fixed source.
+
+Thanks to TSC (@eol) for encouraging me to port PSGrade.
+
+Thanks to iLLNESS, skygunner and sam23 (@psx-scene) for their work on debugging the timing issues.
 
 And thanks to all the community around this work.
