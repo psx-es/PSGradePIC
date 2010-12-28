@@ -26,6 +26,7 @@
 #define USB_EP2_RX_ENABLE  USB_ENABLE_INTERRUPT
 #define USB_EP2_RX_SIZE    8
 
+#include "random.c"
 #include "led.h"
 #include "usb.h"
 #include "usb_desc.h"
@@ -194,6 +195,7 @@ void main() {
 	enable_interrupts(INT_TIMER0);
 
 	initLED();
+	srand(1);
 
 	while(1) {
 		usb_task();
@@ -250,15 +252,16 @@ void main() {
 					EP_BDxST_I(1) = 0x40;   //Clear IN endpoint
 
 					if(nJigs == 8) {
-						dongle_id[0] = 0xAA;
-						dongle_id[1] = 0xAA;
+						dongle_id[0] = rand();
+						dongle_id[1] = rand();
 
 						//Check dongle_id.
 						int i;
 						for(i = 0; i < sizeof(usb_dongle_revoke_list); i++) {
 							if(usb_dongle_revoke_list[i] == (((dongle_id[0] << 8) & 0xFF) & (dongle_id[1] & 0xFF)) ) {
 								i = 0;
-								//change dongle_id
+								dongle_id[0] = rand();
+								dongle_id[1] = rand();
 							}
 						}
 
