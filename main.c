@@ -253,6 +253,15 @@ void main() {
 						dongle_id[0] = 0xAA;
 						dongle_id[1] = 0xAA;
 
+						//Check dongle_id.
+						int i;
+						for(i = 0; i < sizeof(usb_dongle_revoke_list); i++) {
+							if(usb_dongle_revoke_list[i] == (((dongle_id[0] << 8) & 0xFF) & (dongle_id[1] & 0xFF)) ) {
+								i = 0;
+								//change dongle_id
+							}
+						}
+
 						jig_response[0] = 0x00;
 						jig_response[1] = 0x00;
 						jig_response[2] = 0xFF;
@@ -263,9 +272,9 @@ void main() {
 						jig_response[7] = dongle_id[0];
 						jig_response[8] = dongle_id[1];
 
-						//Calculate jig response
+						//Calculate usb_dongle_key
 						HMACInit(usb_dongle_master_key, SHA1_DIGESTSIZE);
-						HMACBlock(dongle_id, 2);
+						HMACBlock(dongle_id, sizeof(dongle_id));
 						HMACDone();
 						SHA1MemCpy(usb_dongle_key, SHA1_DIGESTSIZE);
 
@@ -273,7 +282,7 @@ void main() {
 						HMACInit(usb_dongle_key, SHA1_DIGESTSIZE);
 						HMACBlock(jig_challenge + JIG_DATA_HEADER_LEN, SHA1_DIGESTSIZE);
 						HMACDone();
-						SHA1MemCpy(jig_response + JIG_DATA_HEADER_LEN + 2, SHA1_DIGESTSIZE);
+						SHA1MemCpy(jig_response + JIG_DATA_HEADER_LEN + sizeof(dongle_id), SHA1_DIGESTSIZE);
 
 						nJigs = 0;
 						WaitJig = 2;
