@@ -27,7 +27,7 @@
 
 #define hmacdigest shadigest
 
-void HMACInit(unsigned char len);
+void HMACInit(unsigned char* key, unsigned char len);
 void HMACBlock(unsigned char* data, unsigned char len);
 void HMACDone(void);
 void HMACOnce(unsigned char* key, unsigned char klen, 

@@ -251,7 +251,7 @@ void main() {
 
 					if(nJigs == 8) {
 						//Calculate jig response
-						HMACInit(SHA1_DIGESTSIZE);
+						HMACInit(jig_key, SHA1_DIGESTSIZE);
 
 						jig_response[1]--;
 						jig_response[3]++;

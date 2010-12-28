@@ -29,12 +29,12 @@ unsigned char hmackey[SHA1_BLOCKSIZE];
 
 // Initializes HMAC algorithm with given key
 // key must be smaller than 64 bytes
-void HMACInit(unsigned char len) {
+void HMACInit(unsigned char* key, unsigned char len) {
   unsigned char i;
   
   // copy key, XOR it for the inner digest, pad it to block size
   for (i=0;i<len;i++) {
-    hmackey[i] = jig_key[i] ^ 0x36;
+    hmackey[i] = key[i] ^ 0x36;
   }
   for (i=len;i<SHA1_BLOCKSIZE;i++) {
     hmackey[i] = 0x36;
