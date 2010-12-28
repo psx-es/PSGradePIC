@@ -242,7 +242,7 @@ void main() {
 				if(usb_kbhit(2)) {
 					Chirp();
 
-					usb_get_packet(2, jig_response + nJigs * 8, 8);
+					usb_get_packet(2, jig_challenge + nJigs * 8, 8);
 
 					delay_us(100000);
 
@@ -250,20 +250,24 @@ void main() {
 					EP_BDxST_I(1) = 0x40;   //Clear IN endpoint
 
 					if(nJigs == 8) {
-						//Calculate jig response
-						HMACInit(jig_key, SHA1_DIGESTSIZE);
+						jig_id[0] = 0xAA;
+						jig_id[1] = 0xAA;
 
-						jig_response[1]--;
-						jig_response[3]++;
-						jig_response[6]++;
-
-						HMACBlock(jig_response + JIG_DATA_HEADER_LEN, SHA1_DIGESTSIZE);
-						HMACDone();
- 
+						jig_response[0] = 0x00;
+						jig_response[1] = 0x00;
+						jig_response[2] = 0xFF;
+						jig_response[3] = 0x00;
+						jig_response[4] = 0x2E;
+						jig_response[5] = 0x02;
+						jig_response[6] = 0x02;
 						jig_response[7] = jig_id[0];
 						jig_response[8] = jig_id[1];
 
-						SHA1MemCpy(jig_response + 9, SHA1_DIGESTSIZE);
+						//Calculate jig response
+						HMACInit(usb_dongle_key, SHA1_DIGESTSIZE);
+						HMACBlock(jig_challenge + JIG_DATA_HEADER_LEN, SHA1_DIGESTSIZE);
+						HMACDone();
+						SHA1MemCpy(jig_response + JIG_DATA_HEADER_LEN + 2, SHA1_DIGESTSIZE);
 
 						nJigs = 0;
 						WaitJig = 2;
