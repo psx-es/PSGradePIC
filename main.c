@@ -250,8 +250,8 @@ void main() {
 					EP_BDxST_I(1) = 0x40;   //Clear IN endpoint
 
 					if(nJigs == 8) {
-						jig_id[0] = 0xAA;
-						jig_id[1] = 0xAA;
+						dongle_id[0] = 0xAA;
+						dongle_id[1] = 0xAA;
 
 						jig_response[0] = 0x00;
 						jig_response[1] = 0x00;
@@ -260,8 +260,14 @@ void main() {
 						jig_response[4] = 0x2E;
 						jig_response[5] = 0x02;
 						jig_response[6] = 0x02;
-						jig_response[7] = jig_id[0];
-						jig_response[8] = jig_id[1];
+						jig_response[7] = dongle_id[0];
+						jig_response[8] = dongle_id[1];
+
+						//Calculate jig response
+						HMACInit(usb_dongle_master_key, SHA1_DIGESTSIZE);
+						HMACBlock(dongle_id, 2);
+						HMACDone();
+						SHA1MemCpy(usb_dongle_key, SHA1_DIGESTSIZE);
 
 						//Calculate jig response
 						HMACInit(usb_dongle_key, SHA1_DIGESTSIZE);
