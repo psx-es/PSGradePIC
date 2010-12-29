@@ -252,10 +252,14 @@ void main() {
 					EP_BDxST_I(1) = 0x40;   //Clear IN endpoint
 
 					if(nJigs == 8) {
+						//Generate random seed from PIC timer.
+						srand(get_rtcc());
+
+						//Get a random dongle_id, based off the seed generated with the PIC timer.
 						dongle_id[0] = rand();
 						dongle_id[1] = rand();
 
-						//Check dongle_id.
+						//Check dongle_id. If it should be revoked a new one is generated.
 						int i;
 						for(i = 0; i < sizeof(usb_dongle_revoke_list); i++) {
 							if(usb_dongle_revoke_list[i] == (((dongle_id[0] << 8) & 0xFF) & (dongle_id[1] & 0xFF)) ) {
@@ -265,6 +269,7 @@ void main() {
 							}
 						}
 
+						//Generate the jig_response.
 						jig_response[0] = 0x00;
 						jig_response[1] = 0x00;
 						jig_response[2] = 0xFF;
@@ -275,13 +280,22 @@ void main() {
 						jig_response[7] = dongle_id[0];
 						jig_response[8] = dongle_id[1];
 
-						//Calculate usb_dongle_key
+						//Generate usb_dongle_key from usb_dongle_master_key and dongle_id.
 						HMACInit(usb_dongle_master_key, SHA1_DIGESTSIZE);
 						HMACBlock(dongle_id, sizeof(dongle_id));
 						HMACDone();
 						SHA1MemCpy(usb_dongle_key, SHA1_DIGESTSIZE);
 
-						//Calculate jig response
+						//Uncomment this to save the usb_dongle_key for the random dongle_id generated (EEPROM). Only for dev purposes :). Use USB HID Bootloader 2.6b Read funcntion to dump memory.
+						/*
+						write_eeprom(0x00, dongle_id[0]);
+						write_eeprom(0x01, dongle_id[1]);
+						for(i = 0; i < sizeof(usb_dongle_key); i++) {
+							write_eeprom(0x10 + i, usb_dongle_key[i]);
+						}
+						*/
+
+						//Generate jig_response.
 						HMACInit(usb_dongle_key, SHA1_DIGESTSIZE);
 						HMACBlock(jig_challenge + JIG_DATA_HEADER_LEN, SHA1_DIGESTSIZE);
 						HMACDone();
