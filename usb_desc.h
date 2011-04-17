@@ -14,7 +14,6 @@
 const unsigned int8 USB_DEVICE_DESC[] = {
 	//HUB_DEVICE
 		0x12, 0x01, 0x00, 0x02, 0x09, 0x00, 0x01, 0x08,
-		//0xe3, 0x05, 0x08, 0x06, 0x64, 0x77, 0x00, 0x01,
 		0xAA, 0xAA, 0xCC, 0xCC, 0x00, 0x01, 0x00, 0x00,
 		0x00, 0x01,
 	//HUB_HUB_DEVICE
@@ -63,7 +62,7 @@ static unsigned int8 jig_response[64];
 #define PORT5_DEVICE_SIZE			0x0012
 
 #define HUB_DEVICE_OFFSET			0x0000
-#define HUB_HUB_DEVICE_OFFSET			HUB_DEVICE_SIZE
+#define HUB_HUB_DEVICE_OFFSET		HUB_DEVICE_SIZE
 #define PORT5_DEVICE_OFFSET			HUB_HUB_DEVICE_OFFSET + HUB_HUB_DEVICE_SIZE
 
 #define HUB_CONFIG_SIZE				0x0019
